@@ -7,12 +7,14 @@ interface UserState {
   isAuthenticated: boolean;
   isLoading: boolean;
   progress: TableProgress[];
+  parentPin: string | null;
 
   setUser: (user: UserProfile | null) => void;
   setLoading: (loading: boolean) => void;
   setProgress: (progress: TableProgress[]) => void;
   updateStars: (delta: number) => void;
   updateXP: (delta: number) => void;
+  setParentPin: (pin: string) => void;
   logout: () => void;
 }
 
@@ -23,6 +25,7 @@ export const useUserStore = create<UserState>()(
       isAuthenticated: false,
       isLoading: true,
       progress: [],
+      parentPin: null,
 
       setUser: (user) => set({ user, isAuthenticated: !!user, isLoading: false }),
 
@@ -56,11 +59,13 @@ export const useUserStore = create<UserState>()(
         };
       }),
 
+      setParentPin: (pin) => set({ parentPin: pin }),
+
       logout: () => set({ user: null, isAuthenticated: false, progress: [] }),
     }),
     {
       name: 'math-kids-user',
-      partialize: (state) => ({ user: state.user }),
+      partialize: (state) => ({ user: state.user, parentPin: state.parentPin }),
     }
   )
 );
