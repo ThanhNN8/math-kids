@@ -1,0 +1,26 @@
+{
+  "name": "MathKids - Học Toán Vui",
+  "short_name": "MathKids",
+  "description": "Website học toán cho bé lớp 2 - Rèn luyện bảng cửu chương qua mini-game",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#667eea",
+  "theme_color": "#667eea",
+  "categories": ["education", "games"],
+  "lang": "vi",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
