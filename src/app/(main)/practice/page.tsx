@@ -6,6 +6,13 @@ import Card from '@/components/ui/Card';
 
 const modes = [
   {
+    title: 'Nghe Bảng Cửu Chương',
+    description: 'Nghe đọc và nhẩm theo để thuộc nhanh',
+    icon: '🔊',
+    href: '/practice/listen',
+    color: 'from-orange-400 to-orange-600',
+  },
+  {
     title: 'Bảng Cửu Chương',
     description: 'Luyện tập từng bảng nhân từ 2 đến 9',
     icon: '✖️',
@@ -25,6 +32,13 @@ const modes = [
     icon: '🧠',
     href: '/practice/mental-math',
     color: 'from-green-400 to-green-600',
+  },
+  {
+    title: 'Mẹo Tính Nhanh',
+    description: 'Học cách cộng trừ nhanh: tròn chục, đổi chỗ...',
+    icon: '⚡',
+    href: '/practice/tips',
+    color: 'from-yellow-400 to-orange-500',
   },
 ];
 

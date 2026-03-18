@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Card from '@/components/ui/Card';
@@ -7,13 +8,22 @@ import Button from '@/components/ui/Button';
 import Avatar from '@/components/ui/Avatar';
 import ProgressBar from '@/components/ui/ProgressBar';
 import { useUserStore } from '@/stores/useUserStore';
+import { useAccountsStore } from '@/stores/useAccountsStore';
 import { xpForLevel } from '@/types';
 
 export default function ProfilePage() {
   const router = useRouter();
   const user = useUserStore((s) => s.user);
   const logout = useUserStore((s) => s.logout);
+  const updatePassword = useAccountsStore((s) => s.updatePassword);
   const stats = user?.stats;
+
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [oldPwd, setOldPwd] = useState('');
+  const [newPwd, setNewPwd] = useState('');
+  const [confirmPwd, setConfirmPwd] = useState('');
+  const [pwdError, setPwdError] = useState('');
+  const [pwdSuccess, setPwdSuccess] = useState('');
 
   const currentLevelXP = stats ? xpForLevel(stats.level) : 100;
   const xpProgress = stats ? stats.xp % currentLevelXP : 0;
@@ -24,6 +34,35 @@ export default function ProfilePage() {
   const handleLogout = () => {
     logout();
     router.push('/login');
+  };
+
+  const handleChangePassword = () => {
+    setPwdError('');
+    setPwdSuccess('');
+
+    if (!newPwd || newPwd.length < 4) {
+      setPwdError('Mật khẩu mới phải ít nhất 4 ký tự');
+      return;
+    }
+    if (newPwd !== confirmPwd) {
+      setPwdError('Xác nhận mật khẩu không khớp');
+      return;
+    }
+    if (!user) return;
+
+    const success = updatePassword(user.uid, oldPwd, newPwd);
+    if (success) {
+      setPwdSuccess('Đổi mật khẩu thành công!');
+      setOldPwd('');
+      setNewPwd('');
+      setConfirmPwd('');
+      setTimeout(() => {
+        setShowPasswordForm(false);
+        setPwdSuccess('');
+      }, 1500);
+    } else {
+      setPwdError('Sai mật khẩu cũ');
+    }
   };
 
   return (
@@ -58,9 +97,59 @@ export default function ProfilePage() {
         ))}
       </div>
 
+      {/* Change password */}
+      <Card>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-bold text-gray-700">Đổi mật khẩu</h3>
+          <Button
+            onClick={() => { setShowPasswordForm(!showPasswordForm); setPwdError(''); setPwdSuccess(''); }}
+            variant="ghost"
+            size="sm"
+          >
+            {showPasswordForm ? 'Đóng' : 'Đổi'}
+          </Button>
+        </div>
+        {showPasswordForm && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="space-y-3">
+            <input
+              type="password"
+              inputMode="numeric"
+              value={oldPwd}
+              onChange={(e) => setOldPwd(e.target.value)}
+              placeholder="Mật khẩu cũ"
+              className="w-full border-2 border-gray-200 rounded-xl py-2 px-4 text-gray-800 focus:outline-none focus:border-blue-400"
+            />
+            <input
+              type="password"
+              inputMode="numeric"
+              value={newPwd}
+              onChange={(e) => setNewPwd(e.target.value)}
+              placeholder="Mật khẩu mới"
+              className="w-full border-2 border-gray-200 rounded-xl py-2 px-4 text-gray-800 focus:outline-none focus:border-blue-400"
+            />
+            <input
+              type="password"
+              inputMode="numeric"
+              value={confirmPwd}
+              onChange={(e) => setConfirmPwd(e.target.value)}
+              placeholder="Xác nhận mật khẩu mới"
+              className="w-full border-2 border-gray-200 rounded-xl py-2 px-4 text-gray-800 focus:outline-none focus:border-blue-400"
+            />
+            {pwdError && <p className="text-red-500 text-sm font-bold">{pwdError}</p>}
+            {pwdSuccess && <p className="text-green-500 text-sm font-bold">{pwdSuccess}</p>}
+            <Button onClick={handleChangePassword} variant="primary" fullWidth>
+              Xác nhận đổi mật khẩu
+            </Button>
+          </motion.div>
+        )}
+      </Card>
+
       <Card>
         <h3 className="font-bold text-gray-700 mb-3">Cài đặt</h3>
         <div className="space-y-2">
+          <Button onClick={() => router.push('/history')} variant="ghost" fullWidth>
+            📚 Lịch sử học tập
+          </Button>
           <Button onClick={() => router.push('/parent')} variant="ghost" fullWidth>
             👨‍👩‍👧 Khu vực phụ huynh
           </Button>

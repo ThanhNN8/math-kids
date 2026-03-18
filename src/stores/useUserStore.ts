@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { UserProfile, TableProgress } from '@/types';
+import { useAccountsStore } from './useAccountsStore';
 
 interface UserState {
   user: UserProfile | null;
@@ -14,13 +15,14 @@ interface UserState {
   setProgress: (progress: TableProgress[]) => void;
   updateStars: (delta: number) => void;
   updateXP: (delta: number) => void;
+  updateProblemStats: (totalDelta: number, correctDelta: number) => void;
   setParentPin: (pin: string) => void;
   logout: () => void;
 }
 
 export const useUserStore = create<UserState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       isAuthenticated: false,
       isLoading: true,
@@ -35,12 +37,13 @@ export const useUserStore = create<UserState>()(
 
       updateStars: (delta) => set((state) => {
         if (!state.user) return state;
+        const newStars = state.user.stats.totalStars + delta;
         return {
           user: {
             ...state.user,
             stats: {
               ...state.user.stats,
-              totalStars: state.user.stats.totalStars + delta,
+              totalStars: newStars,
             },
           },
         };
@@ -48,12 +51,27 @@ export const useUserStore = create<UserState>()(
 
       updateXP: (delta) => set((state) => {
         if (!state.user) return state;
+        const newXP = state.user.stats.xp + delta;
         return {
           user: {
             ...state.user,
             stats: {
               ...state.user.stats,
-              xp: state.user.stats.xp + delta,
+              xp: newXP,
+            },
+          },
+        };
+      }),
+
+      updateProblemStats: (totalDelta, correctDelta) => set((state) => {
+        if (!state.user) return state;
+        return {
+          user: {
+            ...state.user,
+            stats: {
+              ...state.user.stats,
+              totalProblems: state.user.stats.totalProblems + totalDelta,
+              totalCorrect: state.user.stats.totalCorrect + correctDelta,
             },
           },
         };
@@ -61,7 +79,14 @@ export const useUserStore = create<UserState>()(
 
       setParentPin: (pin) => set({ parentPin: pin }),
 
-      logout: () => set({ user: null, isAuthenticated: false, progress: [] }),
+      logout: () => {
+        // Sync current stats to accounts store before clearing
+        const user = get().user;
+        if (user) {
+          useAccountsStore.getState().updateAccountStats(user.uid, user.stats);
+        }
+        set({ user: null, isAuthenticated: false, progress: [] });
+      },
     }),
     {
       name: 'math-kids-user',

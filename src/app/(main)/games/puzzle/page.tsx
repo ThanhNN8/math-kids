@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
@@ -10,6 +10,7 @@ import { generateMultiplication } from '@/game/math/ProblemGenerator';
 import type { MathProblem, ProblemResult } from '@/types';
 import { ScoreCalculator } from '@/game/math/ScoreCalculator';
 import { useGameStore } from '@/stores/useGameStore';
+import { useSaveSession } from '@/hooks/useSaveSession';
 
 type Screen = 'start' | 'play' | 'results';
 type Difficulty = 'easy' | 'medium' | 'hard';
@@ -30,6 +31,8 @@ export default function PuzzlePage() {
   const [elapsed, setElapsed] = useState(0);
   const [puzzleEmoji, setPuzzleEmoji] = useState('🐱');
   const setIsPlaying = useGameStore((s) => s.setIsPlaying);
+  const { saveSession, resetSaveFlag } = useSaveSession();
+  const gameStartTimeRef = useRef(0);
   const startTimeRef = { current: 0 };
 
   const gridSize = gridSizes[difficulty];
@@ -53,6 +56,8 @@ export default function PuzzlePage() {
     setProblem(p);
     setSelectedAnswer(null);
     startTimeRef.current = Date.now();
+    resetSaveFlag();
+    gameStartTimeRef.current = Date.now();
     setIsPlaying(true);
     setScreen('play');
   }, [totalPieces, difficulty]);
@@ -95,6 +100,11 @@ export default function PuzzlePage() {
 
   const correctCount = results.filter((r) => r.isCorrect).length;
   const stars = elapsed < 60 ? 3 : elapsed < 120 ? 2 : 1;
+
+  // Save session when entering results
+  if (screen === 'results' && results.length > 0) {
+    saveSession({ type: 'puzzle', results, startedAt: gameStartTimeRef.current, starsOverride: stars });
+  }
 
   if (screen === 'results') {
     return (

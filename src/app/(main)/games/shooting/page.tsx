@@ -8,6 +8,7 @@ import StarRating from '@/components/ui/StarRating';
 import { generateMultiplication } from '@/game/math/ProblemGenerator';
 import { ScoreCalculator } from '@/game/math/ScoreCalculator';
 import { useGameStore } from '@/stores/useGameStore';
+import { useSaveSession } from '@/hooks/useSaveSession';
 import type { MathProblem, ProblemResult } from '@/types';
 
 type Screen = 'start' | 'play' | 'results';
@@ -52,7 +53,9 @@ export default function ShootingPage() {
   const [timeLeft, setTimeLeft] = useState(10);
   const [isAnswering, setIsAnswering] = useState(false);
   const setIsPlaying = useGameStore((s) => s.setIsPlaying);
+  const { saveSession, resetSaveFlag } = useSaveSession();
   const startTimeRef = useRef(0);
+  const gameStartTimeRef = useRef(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const fieldRef = useRef<HTMLDivElement>(null);
 
@@ -160,6 +163,8 @@ export default function ShootingPage() {
     setWaveProblems(0);
     setMissiles([]);
     setIsAnswering(false);
+    resetSaveFlag();
+    gameStartTimeRef.current = Date.now();
     setIsPlaying(true);
     setScreen('play');
     const config = DIFFICULTY_CONFIG[difficulty];
@@ -241,6 +246,11 @@ export default function ShootingPage() {
   const stars = wave >= TOTAL_WAVES && health > 0 ? 3 : wave >= 2 ? 2 : 1;
   const timeLimit = DIFFICULTY_CONFIG[difficulty].timeLimit;
   const timerPercent = (timeLeft / timeLimit) * 100;
+
+  // Save session when entering results
+  if (screen === 'results' && results.length > 0) {
+    saveSession({ type: 'shooting', results, startedAt: gameStartTimeRef.current, starsOverride: stars });
+  }
 
   // Results screen
   if (screen === 'results') {

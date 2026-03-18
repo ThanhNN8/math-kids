@@ -16,9 +16,11 @@ export default function HomePage() {
   const xpProgress = stats ? stats.xp % currentLevelXP : 0;
 
   const studyActions = [
+    { title: 'Nghe đọc', desc: 'Nghe và nhẩm theo', icon: '🔊', href: '/practice/listen', color: 'bg-orange-500' },
     { title: 'Bảng cửu chương', desc: 'Luyện từng bảng', icon: '✖️', href: '/practice/multiplication', color: 'bg-blue-500' },
     { title: 'Nhân hỗn hợp', desc: 'Trộn nhiều bảng', icon: '🔀', href: '/practice/mixed', color: 'bg-pink-500' },
     { title: 'Tính nhẩm', desc: 'Nhanh tay nhanh mắt', icon: '🧠', href: '/practice/mental-math', color: 'bg-green-500' },
+    { title: 'Mẹo nhanh', desc: 'Tròn chục, đổi chỗ', icon: '⚡', href: '/practice/tips', color: 'bg-yellow-500' },
   ];
 
   const gameActions = [

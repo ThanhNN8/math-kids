@@ -11,6 +11,7 @@ import ProgressBar from '@/components/ui/ProgressBar';
 import { generateMultiplication } from '@/game/math/ProblemGenerator';
 import { ScoreCalculator } from '@/game/math/ScoreCalculator';
 import { useGameStore } from '@/stores/useGameStore';
+import { useSaveSession } from '@/hooks/useSaveSession';
 import type { MathProblem, ProblemResult } from '@/types';
 
 type Screen = 'start' | 'race' | 'results';
@@ -41,7 +42,9 @@ export default function RacingPage() {
   const [streak, setStreak] = useState(0);
   const [timeLeft, setTimeLeft] = useState(7);
   const setIsPlaying = useGameStore((s) => s.setIsPlaying);
+  const { saveSession, resetSaveFlag } = useSaveSession();
   const startTimeRef = useRef(0);
+  const raceStartTimeRef = useRef(0);
   const aiIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const isAnsweringRef = useRef(false);
@@ -86,6 +89,8 @@ export default function RacingPage() {
     setResults([]);
     setStreak(0);
     isAnsweringRef.current = false;
+    resetSaveFlag();
+    raceStartTimeRef.current = Date.now();
     setIsPlaying(true);
     setScreen('race');
 
@@ -173,6 +178,11 @@ export default function RacingPage() {
   const stars = playerWon ? 3 : playerPos > aiPos * 0.8 ? 2 : 1;
   const config = DIFFICULTY_CONFIG[difficulty];
   const timerPercent = (timeLeft / config.timeLimit) * 100;
+
+  // Save session when entering results
+  if (screen === 'results' && results.length > 0) {
+    saveSession({ type: 'racing', results, startedAt: raceStartTimeRef.current, starsOverride: stars });
+  }
 
   // Results screen
   if (screen === 'results') {

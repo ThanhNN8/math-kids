@@ -12,6 +12,8 @@ import { generateMixed } from '@/game/math/ProblemGenerator';
 import { ScoreCalculator } from '@/game/math/ScoreCalculator';
 import { DifficultyManager } from '@/game/math/DifficultyManager';
 import { useGameStore } from '@/stores/useGameStore';
+import { useSpeech } from '@/hooks/useSpeech';
+import { useSaveSession } from '@/hooks/useSaveSession';
 import type { MathProblem, ProblemResult } from '@/types';
 
 type Screen = 'start' | 'play' | 'results';
@@ -27,8 +29,11 @@ export default function MentalMathPage() {
   const [results, setResults] = useState<ProblemResult[]>([]);
   const [streak, setStreak] = useState(0);
   const [totalScore, setTotalScore] = useState(0);
+  const [autoSpeak, setAutoSpeak] = useState(true);
   const setIsPlaying = useGameStore((s) => s.setIsPlaying);
+  const { saveSession, resetSaveFlag } = useSaveSession();
   const startTimeRef = useRef(0);
+  const gameStartTimeRef = useRef(0);
   const difficultyRef = useRef(new DifficultyManager());
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -46,6 +51,8 @@ export default function MentalMathPage() {
     setTotalScore(0);
     setTimeLeft(timeLimit);
     difficultyRef.current.reset();
+    resetSaveFlag();
+    gameStartTimeRef.current = Date.now();
     setIsPlaying(true);
     setScreen('play');
     newProblem();
@@ -91,6 +98,11 @@ export default function MentalMathPage() {
 
   const correctCount = results.filter((r) => r.isCorrect).length;
   const stars = ScoreCalculator.calculateStars(results.length, correctCount);
+
+  // Save session when entering results
+  if (screen === 'results' && results.length > 0) {
+    saveSession({ type: 'mental-math', results, startedAt: gameStartTimeRef.current });
+  }
 
   if (screen === 'results') {
     return (
@@ -150,8 +162,21 @@ export default function MentalMathPage() {
           <span>Câu: {results.length + 1}</span>
         </div>
 
+        {/* Auto-speak toggle */}
+        <div className="flex justify-end">
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setAutoSpeak(!autoSpeak)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold transition-all ${
+              autoSpeak ? 'bg-blue-500 text-white' : 'bg-white/20 text-white/60'
+            }`}
+          >
+            {autoSpeak ? '🔊' : '🔇'} Đọc đề
+          </motion.button>
+        </div>
+
         <Card className="text-center py-8">
-          <MathProblemDisplay problem={problem} size="xl" />
+          <MathProblemDisplay problem={problem} size="xl" autoSpeak={autoSpeak} />
         </Card>
 
         <AnswerOptions

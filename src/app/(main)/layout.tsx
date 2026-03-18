@@ -12,7 +12,7 @@ const navItems = [
   { href: '/home', label: 'Trang chủ', icon: '🏠' },
   { href: '/practice', label: 'Học tập', icon: '📖' },
   { href: '/games', label: 'Trò chơi', icon: '🎮' },
-  { href: '/rewards', label: 'Phần thưởng', icon: '🏆' },
+  { href: '/leaderboard', label: 'Xếp hạng', icon: '🏆' },
   { href: '/profile', label: 'Hồ sơ', icon: '👤' },
 ];
 

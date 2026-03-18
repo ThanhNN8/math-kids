@@ -100,6 +100,33 @@ export interface RewardEntry {
   earnedAt: number;
 }
 
+// Multi-account
+export interface AccountRecord {
+  uid: string;
+  displayName: string;
+  avatarId: number;
+  passwordHash: string;
+  role: 'child' | 'parent';
+  createdAt: number;
+  settings: UserSettings;
+  stats: UserStats;
+}
+
+// Saved session history
+export interface SavedSession {
+  id: string;
+  userId: string;
+  type: 'racing' | 'shooting' | 'puzzle' | 'multiplication' | 'mixed' | 'mental-math';
+  startedAt: number;
+  endedAt: number;
+  score: number;
+  accuracy: number;
+  starsEarned: number;
+  totalProblems: number;
+  correctCount: number;
+  durationMs: number;
+}
+
 // Leaderboard
 export interface LeaderboardEntry {
   userId: string;

@@ -14,6 +14,8 @@ import { ScoreCalculator } from '@/game/math/ScoreCalculator';
 import { DifficultyManager } from '@/game/math/DifficultyManager';
 import { useGameStore } from '@/stores/useGameStore';
 import { useUserStore } from '@/stores/useUserStore';
+import { useSpeech } from '@/hooks/useSpeech';
+import { useSaveSession } from '@/hooks/useSaveSession';
 import type { MathProblem, ProblemResult } from '@/types';
 
 type Mode = 'table' | 'quiz' | 'results';
@@ -30,10 +32,15 @@ export default function MultiplicationPage() {
   const startTimeRef = useRef<number>(0);
   const difficultyRef = useRef(new DifficultyManager());
 
+  const [autoSpeak, setAutoSpeak] = useState(true);
+  const { speakResult } = useSpeech();
+
   const gameStore = useGameStore();
   const setIsPlaying = useGameStore((s) => s.setIsPlaying);
   const user = useUserStore((s) => s.user);
   const updateStars = useUserStore((s) => s.updateStars);
+  const { saveSession, resetSaveFlag } = useSaveSession();
+  const quizStartTimeRef = useRef(0);
 
   const TOTAL_PROBLEMS = 20;
 
@@ -49,6 +56,8 @@ export default function MultiplicationPage() {
     setSelectedAnswer(null);
     setFeedbackResult(null);
     startTimeRef.current = Date.now();
+    resetSaveFlag();
+    quizStartTimeRef.current = Date.now();
     setIsPlaying(true);
     setMode('quiz');
   }, []);
@@ -102,6 +111,11 @@ export default function MultiplicationPage() {
   const totalScore = results.reduce((sum, r) => sum + r.score, 0);
   const stars = ScoreCalculator.calculateStars(results.length, correctCount);
 
+  // Save session when entering results
+  if (mode === 'results' && results.length > 0) {
+    saveSession({ type: 'multiplication', results, startedAt: quizStartTimeRef.current });
+  }
+
   if (mode === 'results') {
     return (
       <div className="max-w-lg mx-auto space-y-5">
@@ -151,8 +165,21 @@ export default function MultiplicationPage() {
         </div>
         <ProgressBar value={problemCount} max={TOTAL_PROBLEMS} color="green" height="sm" />
 
+        {/* Auto-speak toggle */}
+        <div className="flex justify-end">
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setAutoSpeak(!autoSpeak)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold transition-all ${
+              autoSpeak ? 'bg-blue-500 text-white' : 'bg-white/20 text-white/60'
+            }`}
+          >
+            {autoSpeak ? '🔊' : '🔇'} Đọc đề
+          </motion.button>
+        </div>
+
         <Card className="text-center py-8">
-          <MathProblemDisplay problem={currentProblem} size="xl" />
+          <MathProblemDisplay problem={currentProblem} size="xl" autoSpeak={autoSpeak} />
         </Card>
 
         <AnswerOptions
@@ -198,9 +225,12 @@ export default function MultiplicationPage() {
         </div>
       </Card>
 
-      {/* Interactive 10x10 table */}
+      {/* Interactive 10x10 table — tap to hear */}
       <Card>
-        <h2 className="text-lg font-bold text-gray-700 mb-3">Bảng Nhân 10×10</h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-bold text-gray-700">Bảng Nhân 10×10</h2>
+          <span className="text-xs text-gray-400">Chạm ô để nghe 🔊</span>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-center text-sm">
             <thead>
@@ -218,7 +248,8 @@ export default function MultiplicationPage() {
                   {Array.from({ length: 10 }, (_, col) => (
                     <td
                       key={col}
-                      className="p-1 rounded-lg text-gray-700 hover:bg-blue-100 cursor-pointer transition-colors font-medium"
+                      onClick={() => speakResult(row + 1, 'multiply', col + 1, (row + 1) * (col + 1))}
+                      className="p-1 rounded-lg text-gray-700 hover:bg-blue-100 active:bg-blue-200 cursor-pointer transition-colors font-medium"
                     >
                       {(row + 1) * (col + 1)}
                     </td>

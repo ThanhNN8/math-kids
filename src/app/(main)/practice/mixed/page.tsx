@@ -13,6 +13,8 @@ import { generateMultiplication } from '@/game/math/ProblemGenerator';
 import { ScoreCalculator } from '@/game/math/ScoreCalculator';
 import { DifficultyManager } from '@/game/math/DifficultyManager';
 import { useGameStore } from '@/stores/useGameStore';
+import { useSpeech } from '@/hooks/useSpeech';
+import { useSaveSession } from '@/hooks/useSaveSession';
 import type { MathProblem, ProblemResult } from '@/types';
 
 type Screen = 'setup' | 'quiz' | 'results';
@@ -28,8 +30,11 @@ export default function MixedMultiplicationPage() {
   const [results, setResults] = useState<ProblemResult[]>([]);
   const [streak, setStreak] = useState(0);
   const [totalScore, setTotalScore] = useState(0);
+  const [autoSpeak, setAutoSpeak] = useState(true);
   const setIsPlaying = useGameStore((s) => s.setIsPlaying);
+  const { saveSession, resetSaveFlag } = useSaveSession();
   const startTimeRef = useRef<number>(0);
+  const quizStartTimeRef = useRef(0);
   const difficultyRef = useRef(new DifficultyManager());
 
   const TOTAL_PROBLEMS = 20;
@@ -57,6 +62,8 @@ export default function MixedMultiplicationPage() {
     setSelectedAnswer(null);
     setFeedbackResult(null);
     startTimeRef.current = Date.now();
+    resetSaveFlag();
+    quizStartTimeRef.current = Date.now();
     setIsPlaying(true);
     setScreen('quiz');
   }, [getRandomTable]);
@@ -102,6 +109,11 @@ export default function MixedMultiplicationPage() {
 
   const correctCount = results.filter((r) => r.isCorrect).length;
   const stars = ScoreCalculator.calculateStars(results.length, correctCount);
+
+  // Save session when entering results
+  if (screen === 'results' && results.length > 0) {
+    saveSession({ type: 'mixed', results, startedAt: quizStartTimeRef.current });
+  }
 
   if (screen === 'results') {
     const avgTime = results.length > 0
@@ -195,8 +207,21 @@ export default function MixedMultiplicationPage() {
           <span>🔥 {streak}</span>
         </div>
 
+        {/* Auto-speak toggle */}
+        <div className="flex justify-end">
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setAutoSpeak(!autoSpeak)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold transition-all ${
+              autoSpeak ? 'bg-pink-500 text-white' : 'bg-white/20 text-white/60'
+            }`}
+          >
+            {autoSpeak ? '🔊' : '🔇'} Đọc đề
+          </motion.button>
+        </div>
+
         <Card className="text-center py-8">
-          <MathProblemDisplay problem={currentProblem} size="xl" />
+          <MathProblemDisplay problem={currentProblem} size="xl" autoSpeak={autoSpeak} />
         </Card>
 
         <AnswerOptions
