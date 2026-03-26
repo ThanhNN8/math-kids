@@ -26,6 +26,13 @@ jobs:
 
       - run: npm ci
       - run: npm run build
+        env:
+          NEXT_PUBLIC_FIREBASE_API_KEY: AIzaSyChzc3yuz5ierUFG2P5gJrdAdVHj4ewOBk
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: math-kids-c984d.firebaseapp.com
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: math-kids-c984d
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: math-kids-c984d.firebasestorage.app
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "766062360362"
+          NEXT_PUBLIC_FIREBASE_APP_ID: "1:766062360362:web:9de31d24869d543616d053"
 
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -4,6 +4,7 @@ import { useAccountsStore } from '@/stores/useAccountsStore';
 import { useUserStore } from '@/stores/useUserStore';
 import type { SavedSession, ProblemResult } from '@/types';
 import { ScoreCalculator } from '@/game/math/ScoreCalculator';
+import { isCloudUser, syncSessionToCloud, syncStatsToCloud } from '@/lib/firebase/syncService';
 
 interface SaveSessionParams {
   type: SavedSession['type'];
@@ -51,15 +52,20 @@ export function useSaveSession() {
     updateStars(stars);
     updateXP(totalScore);
 
-    // Sync to accounts store
-    const currentStats = useUserStore.getState().user?.stats;
-    if (currentStats) {
-      useAccountsStore.getState().updateAccountStats(user.uid, {
-        totalStars: currentStats.totalStars + stars,
-        xp: currentStats.xp + totalScore,
-        totalProblems: currentStats.totalProblems + results.length,
-        totalCorrect: currentStats.totalCorrect + correctCount,
-      });
+    // Sync to cloud or local accounts store
+    if (isCloudUser()) {
+      syncSessionToCloud(session);
+      syncStatsToCloud();
+    } else {
+      const currentStats = useUserStore.getState().user?.stats;
+      if (currentStats) {
+        useAccountsStore.getState().updateAccountStats(user.uid, {
+          totalStars: currentStats.totalStars + stars,
+          xp: currentStats.xp + totalScore,
+          totalProblems: currentStats.totalProblems + results.length,
+          totalCorrect: currentStats.totalCorrect + correctCount,
+        });
+      }
     }
   }, []);
 

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import AuthProvider from '@/components/AuthProvider';
 
 export const metadata: Metadata = {
   title: 'MathKids - Học Toán Vui',
@@ -34,7 +35,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png" />
       </head>
       <body className="safe-area">
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

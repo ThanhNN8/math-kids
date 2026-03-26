@@ -5,6 +5,8 @@ export interface UserProfile {
   avatarId: number;
   role: 'child' | 'parent';
   parentId?: string;
+  email?: string;
+  authProvider?: 'local' | 'firebase';
   createdAt: number;
   settings: UserSettings;
   stats: UserStats;
@@ -107,6 +109,8 @@ export interface AccountRecord {
   avatarId: number;
   passwordHash: string;
   role: 'child' | 'parent';
+  email?: string;
+  authProvider?: 'local' | 'firebase';
   createdAt: number;
   settings: UserSettings;
   stats: UserStats;

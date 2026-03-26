@@ -108,6 +108,10 @@ export const useAccountsStore = create<AccountsState>()(
       setLastLoggedInUid: (uid) => set({ lastLoggedInUid: uid }),
 
       importLegacyAccount: (user) => {
+        // Skip if account with same uid already exists
+        const existing = get().accounts.find((a) => a.uid === user.uid);
+        if (existing) return existing;
+
         const account: AccountRecord = {
           uid: user.uid,
           displayName: user.displayName,

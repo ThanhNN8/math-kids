@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { UserProfile, TableProgress } from '@/types';
 import { useAccountsStore } from './useAccountsStore';
+import { useAuthStore } from './useAuthStore';
+import { logout as firebaseLogout } from '@/lib/firebase/auth';
 
 interface UserState {
   user: UserProfile | null;
@@ -80,11 +82,18 @@ export const useUserStore = create<UserState>()(
       setParentPin: (pin) => set({ parentPin: pin }),
 
       logout: () => {
-        // Sync current stats to accounts store before clearing
         const user = get().user;
-        if (user) {
+        const isFirebaseUser = user?.authProvider === 'firebase';
+
+        if (isFirebaseUser) {
+          // Firebase user: sign out from Firebase + clear auth store
+          firebaseLogout().catch(() => {});
+          useAuthStore.getState().clearAuth();
+        } else if (user) {
+          // Local user: sync stats to accounts store before clearing
           useAccountsStore.getState().updateAccountStats(user.uid, user.stats);
         }
+
         set({ user: null, isAuthenticated: false, progress: [] });
       },
     }),
