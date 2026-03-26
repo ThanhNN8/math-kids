@@ -40,6 +40,13 @@ const modes = [
     href: '/practice/tips',
     color: 'from-yellow-400 to-orange-500',
   },
+  {
+    title: 'Đề Thi',
+    description: 'Toán, Tiếng Việt, Tiếng Anh - Lớp 2 HK2',
+    icon: '📋',
+    href: '/practice/exams',
+    color: 'from-red-400 to-rose-600',
+  },
 ];
 
 export default function PracticePage() {

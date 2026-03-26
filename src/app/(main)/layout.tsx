@@ -24,6 +24,7 @@ const GAME_ROUTES = [
   '/practice/multiplication',
   '/practice/mental-math',
   '/practice/mixed',
+  '/practice/exams',
 ];
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {

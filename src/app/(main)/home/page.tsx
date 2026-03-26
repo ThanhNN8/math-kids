@@ -21,6 +21,7 @@ export default function HomePage() {
     { title: 'Nhân hỗn hợp', desc: 'Trộn nhiều bảng', icon: '🔀', href: '/practice/mixed', color: 'bg-pink-500' },
     { title: 'Tính nhẩm', desc: 'Nhanh tay nhanh mắt', icon: '🧠', href: '/practice/mental-math', color: 'bg-green-500' },
     { title: 'Mẹo nhanh', desc: 'Tròn chục, đổi chỗ', icon: '⚡', href: '/practice/tips', color: 'bg-yellow-500' },
+    { title: 'Đề thi', desc: 'Toán, Việt, Anh', icon: '📋', href: '/practice/exams', color: 'bg-rose-500' },
   ];
 
   const gameActions = [
