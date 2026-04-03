@@ -21,6 +21,7 @@ const GAME_ROUTES = [
   '/games/racing',
   '/games/shooting',
   '/games/puzzle',
+  '/games/road-fighter',
   '/practice/multiplication',
   '/practice/mental-math',
   '/practice/mixed',

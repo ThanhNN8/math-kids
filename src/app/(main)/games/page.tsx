@@ -26,6 +26,13 @@ const games = [
     color: 'from-orange-400 to-orange-600',
     href: '/games/puzzle',
   },
+  {
+    id: 'road-fighter',
+    title: 'Đua Xe Ăn Xăng ⛽',
+    description: 'Lượn lách, né chướng ngại vật và giải toán qua trạm!',
+    color: 'from-emerald-400 to-emerald-600',
+    href: '/games/road-fighter',
+  },
 ];
 
 export default function GamesPage() {
@@ -44,7 +51,7 @@ export default function GamesPage() {
           <Card onClick={() => router.push(game.href)} className="overflow-hidden hover:shadow-xl">
             <div className="flex items-center gap-4">
               <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${game.color} flex items-center justify-center text-4xl shrink-0 shadow-lg`}>
-                {game.id === 'racing' ? '🏎️' : game.id === 'shooting' ? '🚀' : '🧩'}
+                {game.id === 'racing' ? '🏎️' : game.id === 'shooting' ? '🚀' : game.id === 'road-fighter' ? '⛽' : '🧩'}
               </div>
               <div>
                 <h2 className="text-xl font-bold text-gray-800">{game.title}</h2>

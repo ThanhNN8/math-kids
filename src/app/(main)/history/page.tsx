@@ -17,6 +17,7 @@ const TYPE_CONFIG: Record<SavedSession['type'], { label: string; icon: string; c
   racing: { label: 'Đua xe', icon: '🏎️', category: 'games' },
   shooting: { label: 'Bắn tàu', icon: '🚀', category: 'games' },
   puzzle: { label: 'Xếp hình', icon: '🧩', category: 'games' },
+  'road-fighter': { label: 'Đua xe ăn xăng', icon: '⛽', category: 'games' },
 };
 
 function formatDate(timestamp: number): string {

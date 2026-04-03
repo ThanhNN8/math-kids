@@ -63,7 +63,7 @@ export interface TableProgress {
 export interface GameSession {
   id: string;
   userId: string;
-  type: 'practice' | 'racing' | 'shooting' | 'puzzle' | 'mental-math';
+  type: 'practice' | 'racing' | 'shooting' | 'puzzle' | 'mental-math' | 'road-fighter';
   startedAt: number;
   endedAt?: number;
   score: number;
@@ -71,6 +71,23 @@ export interface GameSession {
   starsEarned: number;
   problems: ProblemResult[];
   metadata?: Record<string, unknown>;
+}
+
+// Collection & Shop
+export interface CollectionItem {
+  itemId: string;
+  purchasedAt: number;
+  isFavorite: boolean;
+}
+
+export interface ShopItemDef {
+  id: string;
+  name: string;
+  emoji: string;
+  category: 'pet' | 'character' | 'car' | 'special';
+  cost: number;
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  description: string;
 }
 
 // Rewards
@@ -120,7 +137,7 @@ export interface AccountRecord {
 export interface SavedSession {
   id: string;
   userId: string;
-  type: 'racing' | 'shooting' | 'puzzle' | 'multiplication' | 'mixed' | 'mental-math';
+  type: 'racing' | 'shooting' | 'puzzle' | 'multiplication' | 'mixed' | 'mental-math' | 'road-fighter';
   startedAt: number;
   endedAt: number;
   score: number;
