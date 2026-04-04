@@ -28,6 +28,7 @@ export default function HomePage() {
     { title: 'Đua xe', desc: 'Vượt đối thủ', icon: '🏎️', href: '/games/racing', color: 'bg-red-500' },
     { title: 'Bắn tàu', desc: 'Tiêu diệt quái', icon: '🚀', href: '/games/shooting', color: 'bg-purple-500' },
     { title: 'Xếp hình', desc: 'Ghép ảnh đẹp', icon: '🧩', href: '/games/puzzle', color: 'bg-orange-500' },
+    { title: 'Ăn xăng', desc: 'Né xe, ăn xăng', icon: '⛽', href: '/games/road-fighter', color: 'bg-emerald-500' },
   ];
 
   return (
