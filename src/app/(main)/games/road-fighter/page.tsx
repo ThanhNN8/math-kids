@@ -498,10 +498,11 @@ export default function RoadFighterPage() {
 
   // ── Star calculation ──
   const totalCorrect = allResults.filter((r) => r.isCorrect).length;
-  const accuracy = allResults.length > 0 ? totalCorrect / allResults.length : 0;
-  const stars = maxStage >= 3 && accuracy >= 0.8 ? 3
-              : maxStage >= 2 && accuracy >= 0.6 ? 2
-              : 1;
+  const stars = ScoreCalculator.calculateGameStars({
+    totalProblems: allResults.length,
+    correctCount: totalCorrect,
+    completion: Math.max(0, Math.min(1, maxStage / 3)),
+  });
 
   // ── Save session ──
   if (screen === 'results' && allResults.length > 0) {

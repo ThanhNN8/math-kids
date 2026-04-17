@@ -39,6 +39,35 @@ export class ScoreCalculator {
     return 1;
   }
 
+  static readonly MIN_PROBLEMS_FOR_STARS = 5;
+  static readonly MIN_CORRECT_FOR_STARS = 3;
+
+  static calculateGameStars(params: {
+    totalProblems: number;
+    correctCount: number;
+    completion?: number;
+    minProblems?: number;
+    minCorrect?: number;
+  }): number {
+    const {
+      totalProblems,
+      correctCount,
+      completion = 1,
+      minProblems = this.MIN_PROBLEMS_FOR_STARS,
+      minCorrect = this.MIN_CORRECT_FOR_STARS,
+    } = params;
+
+    if (totalProblems < minProblems || correctCount < minCorrect) return 0;
+
+    const accuracy = correctCount / totalProblems;
+    const clampedCompletion = Math.max(0, Math.min(1, completion));
+
+    if (accuracy >= 0.9 && clampedCompletion >= 0.9) return 3;
+    if (accuracy >= 0.7 && clampedCompletion >= 0.6) return 2;
+    if (accuracy >= 0.5) return 1;
+    return 0;
+  }
+
   static calculateDailyStreak(lastActiveDate: string, currentDate: string): {
     newStreak: number;
     streakBroken: boolean;

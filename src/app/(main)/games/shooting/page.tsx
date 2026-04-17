@@ -243,7 +243,10 @@ export default function ShootingPage() {
   }, [problem, streak, health, waveProblems, wave, spawnNewProblem, isAnswering, clearTimer]);
 
   const correctCount = results.filter((r) => r.isCorrect).length;
-  const stars = wave >= TOTAL_WAVES && health > 0 ? 3 : wave >= 2 ? 2 : 1;
+  const completion = Math.min(1, ((wave - 1) * PROBLEMS_PER_WAVE + waveProblems) / (TOTAL_WAVES * PROBLEMS_PER_WAVE));
+  const stars = health > 0
+    ? ScoreCalculator.calculateGameStars({ totalProblems: results.length, correctCount, completion })
+    : 0;
   const timeLimit = DIFFICULTY_CONFIG[difficulty].timeLimit;
   const timerPercent = (timeLeft / timeLimit) * 100;
 

@@ -175,7 +175,12 @@ export default function RacingPage() {
 
   const correctCount = results.filter((r) => r.isCorrect).length;
   const playerWon = playerPos >= FINISH || (results.length >= TOTAL && playerPos > aiPos);
-  const stars = playerWon ? 3 : playerPos > aiPos * 0.8 ? 2 : 1;
+  const completion = playerWon ? 1 : Math.max(0, Math.min(1, playerPos / FINISH));
+  const stars = ScoreCalculator.calculateGameStars({
+    totalProblems: results.length,
+    correctCount,
+    completion,
+  });
   const config = DIFFICULTY_CONFIG[difficulty];
   const timerPercent = (timeLeft / config.timeLimit) * 100;
 

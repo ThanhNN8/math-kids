@@ -99,7 +99,14 @@ export default function PuzzlePage() {
   }, [problem, selectedAnswer, streak, currentPieceIdx, totalPieces, difficulty]);
 
   const correctCount = results.filter((r) => r.isCorrect).length;
-  const stars = elapsed < 60 ? 3 : elapsed < 120 ? 2 : 1;
+  const piecesPlaced = pieces.filter(Boolean).length;
+  const completion = totalPieces > 0 ? piecesPlaced / totalPieces : 0;
+  const timeBonus = elapsed < 60 ? 1 : elapsed < 120 ? 0.85 : 0.7;
+  const stars = ScoreCalculator.calculateGameStars({
+    totalProblems: results.length,
+    correctCount,
+    completion: completion * timeBonus,
+  });
 
   // Save session when entering results
   if (screen === 'results' && results.length > 0) {

@@ -43,29 +43,21 @@ export function useSaveSession() {
       durationMs: endedAt - startedAt,
     };
 
-    // Save to history store
     useHistoryStore.getState().saveSession(session);
 
-    // Update user stats
-    const updateStars = useUserStore.getState().updateStars;
-    const updateXP = useUserStore.getState().updateXP;
-    updateStars(stars);
-    updateXP(totalScore);
+    const userStore = useUserStore.getState();
+    userStore.updateStars(stars);
+    userStore.updateXP(totalScore);
+    userStore.updateProblemStats(results.length, correctCount);
 
-    // Sync to cloud or local accounts store
+    const newStats = useUserStore.getState().user?.stats;
+    if (!newStats) return;
+
     if (isCloudUser()) {
       syncSessionToCloud(session);
-      syncStatsToCloud();
+      syncStatsToCloud(newStats);
     } else {
-      const currentStats = useUserStore.getState().user?.stats;
-      if (currentStats) {
-        useAccountsStore.getState().updateAccountStats(user.uid, {
-          totalStars: currentStats.totalStars + stars,
-          xp: currentStats.xp + totalScore,
-          totalProblems: currentStats.totalProblems + results.length,
-          totalCorrect: currentStats.totalCorrect + correctCount,
-        });
-      }
+      useAccountsStore.getState().updateAccountStats(user.uid, newStats);
     }
   }, []);
 
