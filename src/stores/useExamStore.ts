@@ -1,13 +1,24 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { ExamAnswer, ExamResult, ExamSubject } from '@/types/exam';
+import type {
+  Exam,
+  ExamAnswer,
+  ExamResult,
+  ExamSubject,
+  ExamSlotAnswer,
+} from '@/types/exam';
+
+export interface ExamDraftAnswer {
+  selectedOptionIndex?: number;
+  textAnswer?: string;
+  slotValues?: Record<string, string>;
+}
 
 interface ExamState {
-  // Current exam session
+  // Current session
   currentExamId: string | null;
   currentSubject: ExamSubject | null;
-  currentQuestionIndex: number;
-  answers: ExamAnswer[];
+  draftAnswers: Record<string, ExamDraftAnswer>;
   isInProgress: boolean;
   startedAt: string | null;
 
@@ -16,9 +27,10 @@ interface ExamState {
 
   // Actions
   startExam: (examId: string, subject: ExamSubject) => void;
-  answerQuestion: (answer: ExamAnswer) => void;
-  nextQuestion: () => void;
-  completeExam: (totalPoints: number, totalQuestions: number) => ExamResult;
+  setOptionDraft: (questionId: string, optionIndex: number) => void;
+  setTextDraft: (questionId: string, text: string) => void;
+  setSlotDraft: (questionId: string, slotId: string, value: string) => void;
+  submitExam: (exam: Exam) => ExamResult;
   reset: () => void;
 
   // Getters
@@ -26,13 +38,93 @@ interface ExamState {
   getBestScore: (examId: string) => number | null;
 }
 
+function normalize(s: string): string {
+  return s.trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function matchesFill(submitted: string, correct: string, acceptable?: string[]): boolean {
+  const sub = normalize(submitted);
+  if (!sub) return false;
+  const pool = [correct, ...(acceptable ?? [])].map(normalize);
+  return pool.some((expected) => expected === sub);
+}
+
+function evaluateExam(exam: Exam, drafts: Record<string, ExamDraftAnswer>): {
+  answers: ExamAnswer[];
+  score: number;
+  correctCount: number;
+} {
+  const answers: ExamAnswer[] = [];
+  let score = 0;
+  let correctCount = 0;
+
+  for (const q of exam.questions) {
+    const draft = drafts[q.id] ?? {};
+
+    if (q.type === 'multiple-choice') {
+      const selected = draft.selectedOptionIndex;
+      const isCorrect = selected !== undefined && selected === q.correctOptionIndex;
+      const pointsEarned = isCorrect ? q.points ?? 1 : 0;
+      if (isCorrect) correctCount++;
+      score += pointsEarned;
+      answers.push({
+        questionId: q.id,
+        selectedOptionIndex: selected,
+        isCorrect,
+        pointsEarned,
+      });
+      continue;
+    }
+
+    if (q.answerSlots && q.answerSlots.length > 0) {
+      const slotAnswers: ExamSlotAnswer[] = q.answerSlots.map((slot) => {
+        const submitted = draft.slotValues?.[slot.id] ?? '';
+        const isSlotCorrect = matchesFill(submitted, slot.correctAnswer, slot.acceptableAnswers);
+        return {
+          slotId: slot.id,
+          submitted,
+          isCorrect: isSlotCorrect,
+          pointsEarned: isSlotCorrect ? slot.points : 0,
+        };
+      });
+      const allCorrect = slotAnswers.every((s) => s.isCorrect);
+      const earned = slotAnswers.reduce((sum, s) => sum + s.pointsEarned, 0);
+      if (allCorrect) correctCount++;
+      score += earned;
+      answers.push({
+        questionId: q.id,
+        slotAnswers,
+        isCorrect: allCorrect,
+        pointsEarned: earned,
+      });
+      continue;
+    }
+
+    // Single fill-blank
+    const submitted = draft.textAnswer ?? '';
+    const isCorrect = q.correctAnswer
+      ? matchesFill(submitted, q.correctAnswer, q.acceptableAnswers)
+      : false;
+    const pointsEarned = isCorrect ? q.points ?? 1 : 0;
+    if (isCorrect) correctCount++;
+    score += pointsEarned;
+    answers.push({
+      questionId: q.id,
+      textAnswer: submitted,
+      isCorrect,
+      pointsEarned,
+    });
+  }
+
+  return { answers, score, correctCount };
+}
+
 export const useExamStore = create<ExamState>()(
   persist(
     (set, get) => ({
       currentExamId: null,
       currentSubject: null,
-      currentQuestionIndex: 0,
-      answers: [],
+      draftAnswers: {},
       isInProgress: false,
       startedAt: null,
       completedExams: [],
@@ -41,30 +133,58 @@ export const useExamStore = create<ExamState>()(
         set({
           currentExamId: examId,
           currentSubject: subject,
-          currentQuestionIndex: 0,
-          answers: [],
+          draftAnswers: {},
           isInProgress: true,
           startedAt: new Date().toISOString(),
         });
       },
 
-      answerQuestion: (answer) => {
+      setOptionDraft: (questionId, optionIndex) => {
         set((state) => ({
-          answers: [...state.answers, answer],
+          draftAnswers: {
+            ...state.draftAnswers,
+            [questionId]: {
+              ...state.draftAnswers[questionId],
+              selectedOptionIndex: optionIndex,
+            },
+          },
         }));
       },
 
-      nextQuestion: () => {
+      setTextDraft: (questionId, text) => {
         set((state) => ({
-          currentQuestionIndex: state.currentQuestionIndex + 1,
+          draftAnswers: {
+            ...state.draftAnswers,
+            [questionId]: {
+              ...state.draftAnswers[questionId],
+              textAnswer: text,
+            },
+          },
         }));
       },
 
-      completeExam: (totalPoints, totalQuestions) => {
+      setSlotDraft: (questionId, slotId, value) => {
+        set((state) => {
+          const prev = state.draftAnswers[questionId] ?? {};
+          return {
+            draftAnswers: {
+              ...state.draftAnswers,
+              [questionId]: {
+                ...prev,
+                slotValues: {
+                  ...(prev.slotValues ?? {}),
+                  [slotId]: value,
+                },
+              },
+            },
+          };
+        });
+      },
+
+      submitExam: (exam) => {
         const state = get();
-        const correctCount = state.answers.filter((a) => a.isCorrect).length;
-        const score = state.answers.reduce((sum, a) => sum + a.pointsEarned, 0);
-        const accuracy = totalQuestions > 0 ? correctCount / totalQuestions : 0;
+        const { answers, score, correctCount } = evaluateExam(exam, state.draftAnswers);
+        const accuracy = exam.totalQuestions > 0 ? correctCount / exam.totalQuestions : 0;
 
         let starsEarned = 0;
         if (accuracy >= 0.9) starsEarned = 3;
@@ -72,25 +192,24 @@ export const useExamStore = create<ExamState>()(
         else if (accuracy >= 0.5) starsEarned = 1;
 
         const result: ExamResult = {
-          examId: state.currentExamId!,
-          subject: state.currentSubject!,
+          examId: exam.id,
+          subject: exam.subject,
           score,
-          totalPoints,
+          totalPoints: exam.totalPoints,
           correctCount,
-          totalQuestions,
+          totalQuestions: exam.totalQuestions,
           accuracy,
           starsEarned,
           completedAt: new Date().toISOString(),
-          answers: state.answers,
+          answers,
         };
 
-        set((state) => ({
-          completedExams: [...state.completedExams, result],
+        set((s) => ({
+          completedExams: [...s.completedExams, result],
           isInProgress: false,
           currentExamId: null,
           currentSubject: null,
-          currentQuestionIndex: 0,
-          answers: [],
+          draftAnswers: {},
           startedAt: null,
         }));
 
@@ -101,8 +220,7 @@ export const useExamStore = create<ExamState>()(
         set({
           currentExamId: null,
           currentSubject: null,
-          currentQuestionIndex: 0,
-          answers: [],
+          draftAnswers: {},
           isInProgress: false,
           startedAt: null,
         });
