@@ -10,6 +10,7 @@ export interface UserProfile {
   createdAt: number;
   settings: UserSettings;
   stats: UserStats;
+  ownedItems: CollectionItem[];
 }
 
 export interface UserSettings {
@@ -131,6 +132,7 @@ export interface AccountRecord {
   createdAt: number;
   settings: UserSettings;
   stats: UserStats;
+  ownedItems: CollectionItem[];
 }
 
 // Saved session history

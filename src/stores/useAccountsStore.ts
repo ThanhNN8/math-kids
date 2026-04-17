@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { AccountRecord, UserSettings, UserStats } from '@/types';
+import type { AccountRecord, UserSettings, UserStats, CollectionItem } from '@/types';
 import { hashPassword, verifyPassword, DEFAULT_PASSWORD } from '@/lib/passwordUtils';
 
 interface AccountsState {
@@ -13,6 +13,7 @@ interface AccountsState {
   findByUid: (uid: string) => AccountRecord | undefined;
   updatePassword: (uid: string, oldPassword: string, newPassword: string) => boolean;
   updateAccountStats: (uid: string, stats: Partial<UserStats>) => void;
+  updateAccountOwnedItems: (uid: string, ownedItems: CollectionItem[]) => void;
   deleteAccount: (uid: string) => void;
   setLastLoggedInUid: (uid: string | null) => void;
   importLegacyAccount: (user: { uid: string; displayName: string; avatarId: number; settings: UserSettings; stats: UserStats }) => AccountRecord;
@@ -52,6 +53,7 @@ export const useAccountsStore = create<AccountsState>()(
           createdAt: Date.now(),
           settings: { ...defaultSettings },
           stats: { ...defaultStats },
+          ownedItems: [],
         };
         set((state) => ({ accounts: [...state.accounts, account] }));
         return account;
@@ -98,6 +100,14 @@ export const useAccountsStore = create<AccountsState>()(
         }));
       },
 
+      updateAccountOwnedItems: (uid, ownedItems) => {
+        set((state) => ({
+          accounts: state.accounts.map((a) =>
+            a.uid === uid ? { ...a, ownedItems } : a
+          ),
+        }));
+      },
+
       deleteAccount: (uid) => {
         set((state) => ({
           accounts: state.accounts.filter((a) => a.uid !== uid),
@@ -121,6 +131,7 @@ export const useAccountsStore = create<AccountsState>()(
           createdAt: Date.now(),
           settings: { ...user.settings },
           stats: { ...user.stats },
+          ownedItems: [],
         };
         set((state) => ({ accounts: [...state.accounts, account] }));
         return account;

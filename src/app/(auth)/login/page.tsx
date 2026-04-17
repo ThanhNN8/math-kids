@@ -102,6 +102,7 @@ export default function LoginPage() {
       stats: account.stats,
       email: account.email,
       authProvider: account.authProvider,
+      ownedItems: account.ownedItems ?? [],
     });
     setLastLoggedInUid(account.uid);
     router.push('/home');
@@ -158,6 +159,7 @@ export default function LoginPage() {
       if (profile) {
         setUser({
           ...profile,
+          ownedItems: profile.ownedItems ?? [],
           email: firebaseUser.email || profile.email,
           authProvider: 'firebase',
         });
@@ -221,6 +223,7 @@ export default function LoginPage() {
           totalProblems: 0,
           totalCorrect: 0,
         },
+        ownedItems: [],
       });
 
       router.push('/home');

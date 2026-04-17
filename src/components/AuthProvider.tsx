@@ -25,6 +25,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
             if (profile) {
               setUser({
                 ...profile,
+                ownedItems: profile.ownedItems ?? [],
                 email: firebaseUser.email || profile.email,
                 authProvider: 'firebase',
               });

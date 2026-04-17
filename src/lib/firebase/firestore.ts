@@ -1,6 +1,6 @@
-import { doc, getDoc, setDoc, updateDoc, collection, addDoc, query, where, orderBy, limit, getDocs, serverTimestamp, increment } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, collection, addDoc, query, where, orderBy, limit, getDocs, serverTimestamp, increment, arrayUnion } from 'firebase/firestore';
 import { db } from './config';
-import type { UserProfile, TableProgress, GameSession, UserStats } from '@/types';
+import type { UserProfile, TableProgress, GameSession, UserStats, CollectionItem } from '@/types';
 
 // User operations
 export async function createUserProfile(uid: string, data: Partial<UserProfile>): Promise<void> {
@@ -26,6 +26,7 @@ export async function createUserProfile(uid: string, data: Partial<UserProfile>)
       totalProblems: 0,
       totalCorrect: 0,
     },
+    ownedItems: [],
     ...data,
   };
   await setDoc(doc(db, 'users', uid), defaultProfile);
@@ -53,6 +54,13 @@ export async function addStars(uid: string, stars: number): Promise<void> {
 export async function addXP(uid: string, xp: number): Promise<void> {
   await updateDoc(doc(db, 'users', uid), {
     'stats.xp': increment(xp),
+  });
+}
+
+export async function purchaseOwnedItem(uid: string, item: CollectionItem, cost: number): Promise<void> {
+  await updateDoc(doc(db, 'users', uid), {
+    ownedItems: arrayUnion(item),
+    'stats.totalStars': increment(-cost),
   });
 }
 
