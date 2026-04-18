@@ -23,10 +23,10 @@ export const toanHk2Lop2De2: Exam = {
       media: {
         kind: 'clock',
         clocks: [
-          { label: 'A', hourDeg: 60, minuteDeg: 180 },
-          { label: 'B', hourDeg: 180, minuteDeg: 90 },
-          { label: 'C', hourDeg: 245, minuteDeg: 90 },
-          { label: 'D', hourDeg: 300, minuteDeg: 90 },
+          { label: 'A', hourDeg: 75, minuteDeg: 180 },
+          { label: 'B', hourDeg: 187.5, minuteDeg: 90 },
+          { label: 'C', hourDeg: 247.5, minuteDeg: 90 },
+          { label: 'D', hourDeg: 307.5, minuteDeg: 90 },
         ],
       },
       options: ['Đồng hồ A', 'Đồng hồ B', 'Đồng hồ C', 'Đồng hồ D'],
