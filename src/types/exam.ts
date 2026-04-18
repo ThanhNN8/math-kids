@@ -74,13 +74,25 @@ export interface TextBoxMedia {
   lines: string[];
 }
 
+export interface ClockFace {
+  label: string;
+  hourDeg: number;
+  minuteDeg: number;
+}
+
+export interface ClockMedia {
+  kind: 'clock';
+  clocks: ClockFace[];
+}
+
 export type ExamMedia =
   | PolylineMedia
   | ColumnArithmeticMedia
   | ShapeCountMedia
   | CountersMedia
   | ChoiceShapesMedia
-  | TextBoxMedia;
+  | TextBoxMedia
+  | ClockMedia;
 
 // ── Answer slot (for multi-blank questions) ──
 

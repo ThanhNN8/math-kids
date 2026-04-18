@@ -7,6 +7,7 @@ import ColumnArithmetic from './ColumnArithmetic';
 import CountersRow from './CountersRow';
 import ChoiceShapesGrid from './ChoiceShapesGrid';
 import TextBox from './TextBox';
+import ClockFaces from './ClockFaces';
 
 interface Props {
   media: ExamMedia;
@@ -27,6 +28,8 @@ export default function ExamMediaRenderer({ media, showAnswers = false }: Props)
       return <ChoiceShapesGrid media={media} />;
     case 'text-box':
       return <TextBox media={media} />;
+    case 'clock':
+      return <ClockFaces media={media} />;
     default:
       return null;
   }
