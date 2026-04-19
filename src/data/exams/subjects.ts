@@ -1,4 +1,7 @@
-import { ExamSubjectInfo } from '@/types/exam';
+import type { ExamSubjectInfo } from '@/types/exam';
+import { toanExams } from './toan';
+import { tiengVietExams } from './tieng-viet';
+import { tiengAnhExams } from './tieng-anh';
 
 export const EXAM_SUBJECTS: ExamSubjectInfo[] = [
   {
@@ -6,20 +9,20 @@ export const EXAM_SUBJECTS: ExamSubjectInfo[] = [
     name: 'Toán',
     icon: '🔢',
     color: 'blue',
-    examCount: 5,
+    examCount: toanExams.length,
   },
   {
     slug: 'tieng-viet',
     name: 'Tiếng Việt',
     icon: '📝',
     color: 'green',
-    examCount: 5,
+    examCount: tiengVietExams.length,
   },
   {
     slug: 'tieng-anh',
     name: 'Tiếng Anh',
     icon: '🌍',
     color: 'purple',
-    examCount: 5,
+    examCount: tiengAnhExams.length,
   },
 ];
