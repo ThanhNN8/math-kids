@@ -294,6 +294,7 @@ export default function ExamDetailClient({ subject, examId, initialMode = 'selec
       <div className="max-w-lg mx-auto">
         <ExamResultSummary
           result={examResult}
+          videoSolutionId={exam.videoSolutionId}
           onReview={() => setMode('review')}
           onBack={handleBackToList}
         />

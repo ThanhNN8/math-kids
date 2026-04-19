@@ -157,6 +157,7 @@ export interface Exam {
   timeMinutes: number;
   sections?: ExamSectionInfo[];
   questions: ExamQuestion[];
+  videoSolutionId?: string;
 }
 
 export interface ExamSubjectInfo {

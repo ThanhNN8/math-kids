@@ -10,6 +10,7 @@ export const toanHk2Lop2De3: Exam = {
   totalQuestions: 11,
   totalPoints: 10,
   timeMinutes: 40,
+  videoSolutionId: 'KEZa4AonUkE',
   sections: [
     { id: 'multiple-choice', title: 'Phần 1: Trắc nghiệm', icon: '✏️', pointsLabel: '3 điểm' },
     { id: 'essay', title: 'Phần 2: Tự luận', icon: '📝', pointsLabel: '7 điểm' },

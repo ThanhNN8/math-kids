@@ -10,6 +10,7 @@ export const toanHk2Lop2De1: Exam = {
   totalQuestions: 11,
   totalPoints: 10,
   timeMinutes: 40,
+  videoSolutionId: 'EUs_JBg-zJk',
   sections: [
     { id: 'multiple-choice', title: 'Phần 1: Trắc nghiệm', icon: '✏️', pointsLabel: '3 điểm' },
     { id: 'essay', title: 'Phần 2: Tự luận', icon: '📝', pointsLabel: '7 điểm' },

@@ -3,14 +3,16 @@
 import { motion } from 'framer-motion';
 import StarRating from '@/components/ui/StarRating';
 import { ExamResult } from '@/types/exam';
+import ExamVideoSolution from './ExamVideoSolution';
 
 interface ExamResultSummaryProps {
   result: ExamResult;
+  videoSolutionId?: string;
   onReview: () => void;
   onBack: () => void;
 }
 
-export default function ExamResultSummary({ result, onReview, onBack }: ExamResultSummaryProps) {
+export default function ExamResultSummary({ result, videoSolutionId, onReview, onBack }: ExamResultSummaryProps) {
   const accuracyPercent = Math.round(result.accuracy * 100);
 
   return (
@@ -55,6 +57,10 @@ export default function ExamResultSummary({ result, onReview, onBack }: ExamResu
           <div className="text-xs text-gray-500 mt-1">Đúng</div>
         </motion.div>
       </div>
+
+      {videoSolutionId && (
+        <ExamVideoSolution videoId={videoSolutionId} />
+      )}
 
       <div className="space-y-3">
         <motion.button
