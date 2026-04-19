@@ -192,8 +192,13 @@ const ExamQuestionView = forwardRef<HTMLDivElement, ExamQuestionViewProps>(
                   activeVoiceTarget.questionId === question.id &&
                   activeVoiceTarget.slotId === slot.id;
 
+                const isMultiline = slot.multiline === true;
+
                 return (
-                  <div key={slot.id} className="flex flex-wrap items-center gap-2">
+                  <div
+                    key={slot.id}
+                    className={isMultiline ? 'flex flex-col gap-1 w-full' : 'flex flex-wrap items-center gap-2'}
+                  >
                     {slot.label && (
                       <label className="text-sm font-medium text-gray-700">
                         {slot.label}
@@ -201,16 +206,26 @@ const ExamQuestionView = forwardRef<HTMLDivElement, ExamQuestionViewProps>(
                     )}
                     {mode === 'take' ? (
                       <>
-                      <input
-                        ref={(el) => {
-                          if (slotRefMap) slotRefMap.set(`${question.id}:${slot.id}`, el);
-                        }}
-                        type="text"
-                        value={value}
-                        onChange={(e) => onChangeSlot?.(slot.id, e.target.value)}
-                        placeholder={slot.placeholder ?? '?'}
-                        className="w-24 px-2 py-1 border-2 border-indigo-200 rounded-md text-center font-mono font-bold text-gray-800 focus:border-indigo-500 outline-none"
-                      />
+                      {isMultiline ? (
+                        <textarea
+                          value={value}
+                          onChange={(e) => onChangeSlot?.(slot.id, e.target.value)}
+                          placeholder={slot.placeholder ?? 'Nhập câu trả lời…'}
+                          rows={slot.rows ?? 3}
+                          className="w-full px-3 py-2 border-2 border-indigo-200 rounded-lg text-gray-800 focus:border-indigo-500 outline-none resize-y"
+                        />
+                      ) : (
+                        <input
+                          ref={(el) => {
+                            if (slotRefMap) slotRefMap.set(`${question.id}:${slot.id}`, el);
+                          }}
+                          type="text"
+                          value={value}
+                          onChange={(e) => onChangeSlot?.(slot.id, e.target.value)}
+                          placeholder={slot.placeholder ?? '?'}
+                          className="w-24 px-2 py-1 border-2 border-indigo-200 rounded-md text-center font-mono font-bold text-gray-800 focus:border-indigo-500 outline-none"
+                        />
+                      )}
                       {showVoice && (
                         <MicButton
                           size="sm"
@@ -223,24 +238,30 @@ const ExamQuestionView = forwardRef<HTMLDivElement, ExamQuestionViewProps>(
                       )}
                       </>
                     ) : (
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`px-2 py-1 rounded font-mono font-bold ${
+                      <div className={isMultiline ? 'flex flex-col gap-2 w-full' : 'flex items-center gap-2 flex-wrap'}>
+                        <div
+                          className={`px-3 py-2 rounded ${isMultiline ? 'text-base whitespace-pre-wrap' : 'font-mono font-bold'} ${
                             isCorrect
                               ? 'bg-green-100 text-green-800'
-                              : 'bg-red-100 text-red-700 line-through'
+                              : 'bg-red-100 text-red-700'
                           }`}
                         >
                           {slotAns?.submitted || '(chưa điền)'}
-                        </span>
-                        {!isCorrect && (
-                          <span className="px-2 py-1 rounded bg-green-100 text-green-800 font-mono font-bold">
-                            → {slot.correctAnswer}
-                          </span>
+                        </div>
+                        {slot.gradingMode === 'self' && slot.referenceAnswer && (
+                          <div className="px-3 py-2 rounded bg-amber-50 border-l-4 border-amber-400 text-gray-700 text-sm whitespace-pre-wrap">
+                            <div className="font-bold text-amber-700 mb-1">Gợi ý đáp án:</div>
+                            {slot.referenceAnswer}
+                          </div>
+                        )}
+                        {slot.gradingMode !== 'self' && !isCorrect && (
+                          <div className={`px-3 py-2 rounded bg-green-100 text-green-800 ${isMultiline ? 'whitespace-pre-wrap' : 'font-mono font-bold'}`}>
+                            {isMultiline ? 'Đáp án: ' : '→ '}{slot.referenceAnswer ?? slot.correctAnswer}
+                          </div>
                         )}
                       </div>
                     )}
-                    {slot.unit && <span className="text-gray-500 text-sm">{slot.unit}</span>}
+                    {slot.unit && !isMultiline && <span className="text-gray-500 text-sm">{slot.unit}</span>}
                   </div>
                 );
               })}

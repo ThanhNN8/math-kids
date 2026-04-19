@@ -49,6 +49,12 @@ function matchesFill(submitted: string, correct: string, acceptable?: string[]):
   return pool.some((expected) => expected === sub);
 }
 
+function matchesKeywords(submitted: string, keywords: string[]): boolean {
+  const sub = normalize(submitted);
+  if (!sub) return false;
+  return keywords.every((kw) => sub.includes(normalize(kw)));
+}
+
 function evaluateExam(exam: Exam, drafts: Record<string, ExamDraftAnswer>): {
   answers: ExamAnswer[];
   score: number;
@@ -79,12 +85,27 @@ function evaluateExam(exam: Exam, drafts: Record<string, ExamDraftAnswer>): {
     if (q.answerSlots && q.answerSlots.length > 0) {
       const slotAnswers: ExamSlotAnswer[] = q.answerSlots.map((slot) => {
         const submitted = draft.slotValues?.[slot.id] ?? '';
-        const isSlotCorrect = matchesFill(submitted, slot.correctAnswer, slot.acceptableAnswers);
+        const mode = slot.gradingMode ?? 'auto';
+        let isSlotCorrect = false;
+        let pointsEarned = 0;
+
+        if (mode === 'self') {
+          const hasContent = submitted.trim().length > 0;
+          isSlotCorrect = hasContent;
+          pointsEarned = hasContent ? slot.points : 0;
+        } else if (mode === 'contains' && slot.containsKeywords) {
+          isSlotCorrect = matchesKeywords(submitted, slot.containsKeywords);
+          pointsEarned = isSlotCorrect ? slot.points : 0;
+        } else {
+          isSlotCorrect = matchesFill(submitted, slot.correctAnswer, slot.acceptableAnswers);
+          pointsEarned = isSlotCorrect ? slot.points : 0;
+        }
+
         return {
           slotId: slot.id,
           submitted,
           isCorrect: isSlotCorrect,
-          pointsEarned: isSlotCorrect ? slot.points : 0,
+          pointsEarned,
         };
       });
       const allCorrect = slotAnswers.every((s) => s.isCorrect);

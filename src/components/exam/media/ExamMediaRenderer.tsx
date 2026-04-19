@@ -8,6 +8,7 @@ import CountersRow from './CountersRow';
 import ChoiceShapesGrid from './ChoiceShapesGrid';
 import TextBox from './TextBox';
 import ClockFaces from './ClockFaces';
+import DictationPlayer from './DictationPlayer';
 
 interface Props {
   media: ExamMedia;
@@ -30,6 +31,8 @@ export default function ExamMediaRenderer({ media, showAnswers = false }: Props)
       return <TextBox media={media} />;
     case 'clock':
       return <ClockFaces media={media} />;
+    case 'dictation':
+      return <DictationPlayer media={media} showAnswers={showAnswers} />;
     default:
       return null;
   }

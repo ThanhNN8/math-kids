@@ -85,6 +85,13 @@ export interface ClockMedia {
   clocks: ClockFace[];
 }
 
+export interface DictationMedia {
+  kind: 'dictation';
+  title?: string;
+  passage: string;
+  rate?: number;
+}
+
 export type ExamMedia =
   | PolylineMedia
   | ColumnArithmeticMedia
@@ -92,9 +99,12 @@ export type ExamMedia =
   | CountersMedia
   | ChoiceShapesMedia
   | TextBoxMedia
-  | ClockMedia;
+  | ClockMedia
+  | DictationMedia;
 
 // ── Answer slot (for multi-blank questions) ──
+
+export type SlotGradingMode = 'auto' | 'self' | 'contains';
 
 export interface ExamAnswerSlot {
   id: string;
@@ -105,6 +115,11 @@ export interface ExamAnswerSlot {
   points: number;
   placeholder?: string;
   unit?: string;
+  multiline?: boolean;
+  rows?: number;
+  gradingMode?: SlotGradingMode;
+  containsKeywords?: string[];
+  referenceAnswer?: string;
 }
 
 // ── Question ──
